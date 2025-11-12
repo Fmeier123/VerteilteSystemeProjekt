@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontenübersicht – Meine Bank</title>
+
+  <style>
+    /* ====== Grundlayout ====== */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #00539C;
+      color: white;
+      text-align: center;
+      padding: 1em 0;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px black;
+      padding: 20px;
+    }
+
+    /* ====== Kontoinformationen ====== */
+    .konto-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid white;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .saldo {
+      font-size: 1.5em;
+      color: #00539C;
+    }
+
+    /* ====== Umsatz-Tabelle ====== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f3f3f3;
+    }
+
+    .negativ {
+      color: red;
+    }
+
+    .positiv {
+      color: green;
+    }
+
+    /* ====== Button ====== */
+    button {
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: #00539C;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #003f73;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Meine Bank – Kontenübersicht</h1>
+  </header>
+
+  <main>
+    <!-- Kontoinformationen -->
+    <div class="konto-info">
+      <div>
+        <h2>Girokonto</h2>
+        <p>IBAN: DE12 3456 7890 1234 5678 90</p>
+      </div>
+      <div class="saldo" id="saldoAnzeige">Lade...</div>
+    </div>
+
+    <!-- Umsatzliste -->
+    <table>
+      <thead>
+        <tr>
+          <th>Datum</th>
+          <th>Verwendungszweck</th>
+          <th>Betrag (€)</th>
+          <th>Aktion</th>
+        </tr>
+      </thead>
+      <tbody id="umsatzTabelle"></tbody>
+    </table>
+
+    <!-- Button zum Aktualisieren -->
+    <button id="aktualisierenBtn">Umsätze aktualisieren</button>
+  </main>
+
+  <script>
+    // Beispiel-Daten
+    const umsaetze = [
+      { datum: "25.10.2025", text: "Einkauf Feneberg", betrag: -35.60, senderIBAN: "DE12 3456 7890 1234 5678 92" },
+      { datum: "24.10.2025", text: "Gehalt 10/2025", betrag: 2150.00, senderIBAN: "DE12 2910 7890 1234 5678 92" },
+      { datum: "22.10.2025", text: "Netflix-Abo", betrag: -12.99, senderIBAN: "DE12 3456 1234 1234 5678 92"},
+      { datum: "20.10.2025", text: "Mama Geburtstag", betrag: 88.45, senderIBAN: "DE12 3456 7890 7890 5678 92" }
+    ];
+
+    // Tabelle mit Umsätzen füllen
+    function ladeUmsaetze() {
+      const tabelle = document.getElementById("umsatzTabelle");
+      tabelle.innerHTML = "";
+
+      let saldo = 0;
+
+      umsaetze.forEach((eintrag, index) => {
+        const zeile = document.createElement("tr");
+        zeile.innerHTML = `
+          <td>${eintrag.datum}</td>
+          <td>${eintrag.text}</td>
+          <td class="${eintrag.betrag < 0 ? 'negativ' : 'positiv'}">
+            ${eintrag.betrag.toFixed(2)}
+          </td>
+          <td><button onclick="ladeDetails(${index})">Details</button></td>
+        `;
+        tabelle.appendChild(zeile);
+        saldo += eintrag.betrag;
+      });
+
+      // Saldo anzeigen
+      const saldoAnzeige = document.getElementById("saldoAnzeige");
+      saldoAnzeige.textContent = saldo.toFixed(2) + " €";
+      saldoAnzeige.className = saldo >= 0 ? "saldo positiv" : "saldo negativ";
+    }
+
+    // Funktion: Details zu einer Buchung anzeigen
+    function ladeDetails(index) {
+      const eintrag = umsaetze[index];
+      const url = `details.html?datum=${encodeURIComponent(eintrag.datum)}&text=${encodeURIComponent(eintrag.text)}&betrag=${encodeURIComponent(eintrag.betrag.toFixed(2))}&senderIBAN=${encodeURIComponent(eintrag.senderIBAN)}`;
+      window.location.href = url;
+    }
+
+    // Umsätze neu laden
+    document.getElementById("aktualisierenBtn").addEventListener("click", ladeUmsaetze);
+
+    // Beim Start automatisch laden
+    ladeUmsaetze();
+  </script>
+</body>
+</html>

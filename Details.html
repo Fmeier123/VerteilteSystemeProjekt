@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buchungsdetails – Meine Bank</title>
+
+  <style>
+    /* ====== Grundlayout ====== */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #00539C;
+      color: white;
+      text-align: center;
+      padding: 1em 0;
+    }
+
+    main {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 2px 6px black;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #00539C;
+      border-bottom: 2px solid #00539C;
+      padding-bottom: 8px;
+    }
+
+    .detail-item {
+       margin: 15px 0;
+      font-size: 1.1em;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #00539C;
+      display: inline-block;
+      width: 160px;
+    }    .value {
+      flex: 1;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+    }
+
+
+    .betrag {
+      font-weight: bold;
+    }
+
+    .positiv {
+      color: green;
+    }
+
+    .negativ {
+      color: red;
+    }
+
+    /* ====== Button ====== */
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #00539C;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #003f73;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Meine Bank – Buchungsdetails</h1>
+  </header>
+
+  <main>
+    <h2>Buchungsinformation</h2>
+
+    <div class="detail-item">
+      <span class="label">Datum:</span>
+      <span id="detail-datum"></span>
+    </div>
+
+    <div class="detail-item">
+      <span class="label">Verwendungszweck:</span>
+      <span id="detail-text"></span>
+    </div>
+
+    <div class="detail-item">
+      <span class="label">Betrag:</span>
+      <span id="detail-betrag" class="betrag"></span>
+    </div>
+    <div class="detail-senderIBAN">
+      <span class="label">IBAN:</span>
+      <span id="detail-senderIBAN" class="senderIBAN"></span>
+    </div>
+
+    <button onclick="window.history.back()">Zurück zur Übersicht</button>
+  </main>
+
+  <script>
+    // Parameter aus der URL auslesen
+    const params = new URLSearchParams(window.location.search);
+    const datum = params.get("datum");
+    const text = params.get("text");
+    const betrag = parseFloat(params.get("betrag"));
+    const IBAN= params.get("senderIBAN");
+
+    // Werte in HTML einsetzen
+    document.getElementById("detail-datum").textContent = datum;
+    document.getElementById("detail-text").textContent = text;
+
+    const betragElement = document.getElementById("detail-betrag");
+    betragElement.textContent = betrag.toFixed(2) + " €";
+    betragElement.classList.add(betrag < 0 ? "negativ" : "positiv");
+    document.getElementById("details-senderIBAN").textContent = IBAN;
+  </script>
+
+</body>
+</html>
