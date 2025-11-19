@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kontenübersicht – Meine Bank</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
 
   <style>
     /* ====== Grundlayout ====== */
@@ -117,55 +118,56 @@
     <!-- Button zum Aktualisieren -->
     <button id="aktualisierenBtn">Umsätze aktualisieren</button>
   </main>
+<script>
+  let db;
 
-  <script>
-    // Beispiel-Daten
-    const umsaetze = [
-      { datum: "25.10.2025", text: "Einkauf Feneberg", betrag: -35.60, senderIBAN: "DE12 3456 7890 1234 5678 92" },
-      { datum: "24.10.2025", text: "Gehalt 10/2025", betrag: 2150.00, senderIBAN: "DE12 2910 7890 1234 5678 92" },
-      { datum: "22.10.2025", text: "Netflix-Abo", betrag: -12.99, senderIBAN: "DE12 3456 1234 1234 5678 92"},
-      { datum: "20.10.2025", text: "Mama Geburtstag", betrag: 88.45, senderIBAN: "DE12 3456 7890 7890 5678 92" }
-    ];
+  async function ladeDatenbank() {
+    const SQL = await initSqlJs({
+      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
+    });
 
-    // Tabelle mit Umsätzen füllen
-    function ladeUmsaetze() {
-      const tabelle = document.getElementById("umsatzTabelle");
-      tabelle.innerHTML = "";
-
-      let saldo = 0;
-
-      umsaetze.forEach((eintrag, index) => {
-        const zeile = document.createElement("tr");
-        zeile.innerHTML = `
-          <td>${eintrag.datum}</td>
-          <td>${eintrag.text}</td>
-          <td class="${eintrag.betrag < 0 ? 'negativ' : 'positiv'}">
-            ${eintrag.betrag.toFixed(2)}
-          </td>
-          <td><button onclick="ladeDetails(${index})">Details</button></td>
-        `;
-        tabelle.appendChild(zeile);
-        saldo += eintrag.betrag;
-      });
-
-      // Saldo anzeigen
-      const saldoAnzeige = document.getElementById("saldoAnzeige");
-      saldoAnzeige.textContent = saldo.toFixed(2) + " €";
-      saldoAnzeige.className = saldo >= 0 ? "saldo positiv" : "saldo negativ";
-    }
-
-    // Funktion: Details zu einer Buchung anzeigen
-    function ladeDetails(index) {
-      const eintrag = umsaetze[index];
-      const url = `details.html?datum=${encodeURIComponent(eintrag.datum)}&text=${encodeURIComponent(eintrag.text)}&betrag=${encodeURIComponent(eintrag.betrag.toFixed(2))}&senderIBAN=${encodeURIComponent(eintrag.senderIBAN)}`;
-      window.location.href = url;
-    }
-
-    // Umsätze neu laden
-    document.getElementById("aktualisierenBtn").addEventListener("click", ladeUmsaetze);
-
-    // Beim Start automatisch laden
+    // DB-Datei laden (muss in /db/Bank.db liegen)
+    const dbFile = await fetch("db/Bank.db");
+    const buffer = await dbFile.arrayBuffer();
+    db = new SQL.Database(new Uint8Array(buffer));
     ladeUmsaetze();
-  </script>
-</body>
+  }
+
+  function ladeUmsaetze() {
+    const tabelle = document.getElementById("umsatzTabelle");
+    tabelle.innerHTML = "";
+
+    // Aus deiner Tabelle "Umsatz" lesen
+    const stmt = db.prepare(`
+      SELECT Datum, Beschreibung, Betrag
+      FROM Umsatz
+      ORDER BY Datum DESC
+    `);
+
+    let saldo = 0;
+
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      const zeile = document.createElement("tr");
+
+      zeile.innerHTML = `
+        <td>${row.Datum}</td>
+        <td>${row.Beschreibung}</td>
+        <td class="${row.Betrag < 0 ? 'negativ' : 'positiv'}">
+            ${parseFloat(row.Betrag).toFixed(2)}
+        </td>
+        <td><button>Details</button></td>
+      `;
+
+      tabelle.appendChild(zeile);
+      saldo += parseFloat(row.Betrag);
+    }
+
+    document.getElementById("saldoAnzeige").textContent =
+      saldo.toFixed(2) + " €";
+  }
+
+  ladeDatenbank();
+</script>
+
 </html>

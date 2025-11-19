@@ -1,0 +1,16 @@
+-Introduktion = nicht so tief technisch, ( 1. 2absätze passen)
+-Business Goals = mehr Vorteile rausarbeiten, konkurrenzfähigkeit, Skalierbarkeit, filialminimierung ( Smart)
+-user Story sehr gut, detaliert
+-2.3 richtig, aber wir sind schon zu nah an lösung, mehr rausarbeiten warum zb Sicherheit von Relevanz, zu früh Umsetzung erwähnt
+-scope: es geht nicht um funktionalitäten sondern um Abgrenzung was nicht gemacht wird ( können wir lassen wegen BankingApp)
+-Qualitäten sollten in 2.5 dargestellt sein, aber Business und technisch
+-3.eventdriven yay, interessant= 3.Kapitel sehr gut
+-Diagramme gut aber auch noch beschreiben was da zu sehen ist, Queue Umsetzung zb
+-techn decisions: sehr gut mit alternativen und so
+-risks: risikomatrix reinbauen ( fürs management)
+-
+
+=> bei zwei technisch raus und bei 3 umschreiben 
+
+
+Diagramm Umsatz Veränderungen: zeit Geld achse, labels zum suchen,
