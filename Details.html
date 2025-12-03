@@ -1,138 +1,253 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Buchungsdetails – Meine Bank</title>
-
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+  
   <style>
-    /* ====== Grundlayout ====== */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: white;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background-color: #00539C;
-      color: white;
-      text-align: center;
-      padding: 1em 0;
-    }
-
+    body { font-family: Arial; background:#f5f6fa; margin:0; padding:0; }
+    header { background:#00539C; color:white; text-align:center; padding:1em; }
     main {
-      max-width: 700px;
-      margin: 40px auto;
-      background-color: white;
-      border-radius: 15px;
-      box-shadow: 0 2px 6px black;
-      padding: 20px;
+      max-width:700px; margin:40px auto; background:white; padding:25px 30px;
+      border-radius:15px; box-shadow:0 2px 6px rgba(0,0,0,0.3);
+    }
+    h2 { color:#00539C; border-bottom:2px solid #00539C; padding-bottom:8px; }
+    .detail-item { margin:15px 0; display:flex; flex-wrap:wrap; }
+    .label { width:180px; color:#00539C; font-weight:bold; }
+    .value { flex:1; }
+    .betrag { font-weight:bold; }
+    .positiv { color:green; } .negativ { color:red; }
+
+    /* Labels */
+    .label-container { display:flex; flex-wrap:wrap; gap:8px; margin-top:5px; }
+    .tag {
+      background:#00539C; color:white; padding:6px 12px;
+      border-radius:20px; font-size:0.9em; position:relative;
+    }
+    .tag.temp {
+      background:#ff6b35;
     }
 
-    h2 {
-      color: #00539C;
-      border-bottom: 2px solid #00539C;
-      padding-bottom: 8px;
+    .label-input-row { display:flex; gap:10px; margin-top:12px; }
+    input[type=text] {
+      flex:1; padding:8px; border:1px solid #ccc; border-radius:6px;
     }
 
-    .detail-item {
-       margin: 15px 0;
-      font-size: 1.1em;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-
-    .label {
-      font-weight: bold;
-      color: #00539C;
-      display: inline-block;
-      width: 160px;
-    }    .value {
-      flex: 1;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      white-space: normal;
-    }
-
-
-    .betrag {
-      font-weight: bold;
-    }
-
-    .positiv {
-      color: green;
-    }
-
-    .negativ {
-      color: red;
-    }
-
-    /* ====== Button ====== */
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #00539C;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      background:#00539C; color:white; border:none;
+      padding:10px 18px; border-radius:6px; cursor:pointer;
     }
+    button:hover { background:#003f73; }
 
-    button:hover {
-      background-color: #003f73;
-    }
+    .back-btn { margin-top:25px; width:100%; }
   </style>
 </head>
+
 <body>
+<header>
+  <h1>Meine Bank – Buchungsdetails</h1>
+</header>
 
-  <header>
-    <h1>Meine Bank – Buchungsdetails</h1>
-  </header>
+<main>
+  <h2>Buchungsinformation</h2>
+  <div class="detail-item">
+    <span class="label">Datum:</span><span id="detail-datum" class="value"></span>
+  </div>
+  <div class="detail-item">
+    <span class="label">Verwendungszweck:</span><span id="detail-text" class="value"></span>
+  </div>
+  <div class="detail-item">
+    <span class="label">Betrag:</span><span id="detail-betrag" class="betrag value"></span>
+  </div>
+  <div class="detail-item">
+    <span class="label">IBAN:</span><span id="detail-senderIBAN" class="value"></span>
+  </div>
+  <div class="detail-item">
+    <span class="label">Labels:</span>
+    <div id="labelList" class="label-container value"></div>
+  </div>
+  <div class="label-input-row">
+    <input type="text" id="newLabelInput" placeholder="Neues Label hinzufügen …" />
+    <button onclick="addLabel()">Hinzufügen</button>
+  </div>
+  <button class="back-btn" onclick="zurueckZurUebersicht()">Zurück zur Übersicht</button>
+</main>
 
-  <main>
-    <h2>Buchungsinformation</h2>
+<script>
+const params = new URLSearchParams(window.location.search);
+const umsatzID = parseInt(params.get("umsatzID"));
 
-    <div class="detail-item">
-      <span class="label">Datum:</span>
-      <span id="detail-datum"></span>
-    </div>
+if (isNaN(umsatzID)) {
+  alert("Ungültige UmsatzID");
+  window.history.back();
+}
 
-    <div class="detail-item">
-      <span class="label">Verwendungszweck:</span>
-      <span id="detail-text"></span>
-    </div>
+let db;
+let dbLabels = [];
+let temporaereLabels = [];
 
-    <div class="detail-item">
-      <span class="label">Betrag:</span>
-      <span id="detail-betrag" class="betrag"></span>
-    </div>
-    <div class="detail-senderIBAN">
-      <span class="label">IBAN:</span>
-      <span id="detail-senderIBAN" class="senderIBAN"></span>
-    </div>
+// SQLite-Datenbank laden
+async function ladeDatenbank() {
+  try {
+    const SQL = await initSqlJs({
+      locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}`
+    });
 
-    <button onclick="window.history.back()">Zurück zur Übersicht</button>
-  </main>
+    const file = await fetch("db/Bank.db");
+    const buf = await file.arrayBuffer();
+    db = new SQL.Database(new Uint8Array(buf));
 
-  <script>
-    // Parameter aus der URL auslesen
-    const params = new URLSearchParams(window.location.search);
-    const datum = params.get("datum");
-    const text = params.get("text");
-    const betrag = parseFloat(params.get("betrag"));
-    const IBAN= params.get("senderIBAN");
+    ladeUmsatzDaten();
+  } catch (error) {
+    console.error("Fehler beim Laden der Datenbank:", error);
+  }
+}
 
-    // Werte in HTML einsetzen
-    document.getElementById("detail-datum").textContent = datum;
-    document.getElementById("detail-text").textContent = text;
+// Labels zu einem Umsatz abrufen
+function ladeLabelsAusDatenbank(umsatzID) {
+    try {
+        const stmt = db.prepare(`
+            SELECT Labels.Name
+            FROM Labels
+            JOIN UmsatzLabels ON Labels.LabelID = UmsatzLabels.LabelID
+            WHERE UmsatzLabels.UmsatzID = ?
+        `);
 
-    const betragElement = document.getElementById("detail-betrag");
-    betragElement.textContent = betrag.toFixed(2) + " €";
-    betragElement.classList.add(betrag < 0 ? "negativ" : "positiv");
-    document.getElementById("details-senderIBAN").textContent = IBAN;
-  </script>
+        stmt.bind([umsatzID]);
+
+        let list = [];
+        while (stmt.step()) {
+            list.push(stmt.getAsObject().Name);
+        }
+        stmt.free();
+
+        return list;
+    } catch (error) {
+        console.error("Fehler beim Laden der Labels:", error);
+        return [];
+    }
+}
+
+function ladeUmsatzDaten() {
+  try {
+    const stmt = db.prepare(`
+      SELECT UmsatzID, Datum, Beschreibung, Betrag, SenderIBAN
+      FROM Umsatz
+      WHERE UmsatzID = ?
+    `);
+
+    stmt.bind([umsatzID]);
+
+    if (stmt.step()) {
+      const daten = stmt.getAsObject();
+
+      // Daten anzeigen
+      document.getElementById("detail-datum").textContent = daten.Datum;
+      document.getElementById("detail-text").textContent = daten.Beschreibung;
+      const betragEl = document.getElementById("detail-betrag");
+      const betrag = parseFloat(daten.Betrag);
+      betragEl.textContent = betrag.toFixed(2) + " €";
+      betragEl.className = "betrag value " + (betrag < 0 ? "negativ" : "positiv");
+      document.getElementById("detail-senderIBAN").textContent = daten.SenderIBAN;
+
+      // Labels laden
+      dbLabels = ladeLabelsAusDatenbank(umsatzID);
+      
+      // Temporäre Labels aus URL-Parameter laden
+      const tempLabelsParam = params.get("tempLabels");
+      if (tempLabelsParam) {
+        temporaereLabels = tempLabelsParam.split(",").map(l => l.trim()).filter(l => l);
+      }
+      
+      renderLabels();
+    } else {
+      alert("Kein Umsatz mit dieser ID gefunden");
+      window.history.back();
+    }
+    stmt.free();
+  } catch (error) {
+    console.error("Fehler beim Laden der Umsatzdaten:", error);
+  }
+}
+
+function renderLabels() {
+  const list = document.getElementById("labelList");
+  list.innerHTML = "";
+  
+  // DB-Labels anzeigen
+  dbLabels.forEach(l => {
+    const div = document.createElement("div");
+    div.className = "tag";
+    div.textContent = l;
+    list.appendChild(div);
+  });
+  
+  // Temporäre Labels anzeigen (in anderer Farbe)
+  temporaereLabels.forEach(l => {
+    const div = document.createElement("div");
+    div.className = "tag temp";
+    div.textContent = l + " (neu)";
+    list.appendChild(div);
+  });
+}
+
+function addLabel() {
+  const input = document.getElementById("newLabelInput");
+  const newLabel = input.value.trim();
+  
+  if (!newLabel) return;
+  
+  // Prüfen ob Label bereits existiert
+  if (dbLabels.includes(newLabel) || temporaereLabels.includes(newLabel)) {
+    alert("Label bereits vorhanden");
+    return;
+  }
+  
+  // Temporäres Label hinzufügen
+  temporaereLabels.push(newLabel);
+  renderLabels();
+  input.value = "";
+  
+  // URL-Parameter aktualisieren
+  updateURLParams();
+}
+
+function updateURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  if (temporaereLabels.length > 0) {
+    params.set("tempLabels", temporaereLabels.join(","));
+  } else {
+    params.delete("tempLabels");
+  }
+  window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+}
+
+function zurueckZurUebersicht() {
+  // Temporäre Labels an Hauptseite übertragen
+  if (temporaereLabels.length > 0) {
+    localStorage.setItem('labelUpdate', JSON.stringify({
+      umsatzID: umsatzID,
+      labels: temporaereLabels
+    }));
+  }
+  
+  window.history.back();
+}
+
+// Enter-Taste im Input-Feld
+document.getElementById("newLabelInput").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    addLabel();
+  }
+});
+
+// Datenbank laden beim Start
+ladeDatenbank();
+
+</script>
 
 </body>
 </html>

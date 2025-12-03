@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vue v-model + Watcher + Fokus</title>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    .app {
+      max-width: 480px;
+    }
+    input {
+      padding: 0.5rem;
+      width: 100%;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: #f4f4f4;
+      border-radius: 4px;
+    }
+    button:hover {
+      filter: brightness(0.96);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app" class="app">
+    <label for="eingabe">Text eingeben:</label>
+    <input id="eingabe" ref="eingabeRef" v-model="text" placeholder="Tippe etwas..." />
+
+    <div style="margin-top: 1rem;">
+      <button @click="fokusZurueck">Fokus zurücksetzen</button>
+      <button @click="clear">Leeren</button>
+    </div>
+
+    <p style="margin-top: 1rem;">
+      Aktueller Wert: <strong>{{ text }}</strong>
+    </p>
+  </div>
+
+  <script>
+    const { createApp, ref, watch } = Vue;
+
+    createApp({
+      setup() {
+        const text = ref("");
+        const eingabeRef = ref(null);
+
+        // Watcher reagiert auf Änderungen
+        watch(text, (neu, alt) => {
+          console.log(`Text hat sich geändert: "${alt}" → "${neu}"`);
+        });
+
+        function fokusZurueck() {
+          if (eingabeRef.value) {
+            eingabeRef.value.focus();
+          }
+        }
+
+        function clear() {
+          text.value = "";
+        }
+
+        return { text, eingabeRef, fokusZurueck, clear };
+      }
+    }).mount("#app");
+  </script>
+
+</body>
+</html>
