@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontenübersicht – Meine Bank</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js">
+ 
+</script>
+
+  
+</head>
+<body>
+<header>
+  <div class="styled-wrapper">
+    <button class="button" onclick="window.history.back()">
+      <span class="button-box">
+        <svg class="button-elem" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  <h1>Meine Bank – Kontenübersicht</h1>
+
+  <div class="toggle-switch">
+    <label class="switch-label">
+      <input type="checkbox" class="checkbox">
+      <span class="slider"></span>
+    </label>
+  </div>
+</header>
+
+
+<main>
+  <div class="konto-info">
+    <div>
+      <h2>Girokonto</h2>
+      <p>IBAN: <span id="ibanAnzeige">Lade...</span></p>
+    </div>
+    <div class="saldo" id="saldoAnzeige">Lade...</div>
+  </div>
+
+<input 
+  type="text" 
+  id="searchInput" 
+  placeholder="Suche in allen Spalten..."
+>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Beschreibung</th>
+        <th>Betrag (€)</th>
+        <th>Labels</th>
+        <th>Aktion</th>
+      </tr>
+    </thead>
+    <tbody id="umsatzTabelle"></tbody>
+  </table>
+
+  <button id="aktualisierenBtn">Umsätze aktualisieren</button>
+  <button id="printOverviewBtn">Übersicht drucken</button>
+
+</main>
+
+<script src="js/UmsätzeÜ.js">
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<footer style="background:#00539C; padding:20px; text-align:center;">
+    <div style="font-size:24px;">
+        <a href="https://www.instagram.com/spardabw/?hl=de" 
+           target="blank" 
+           style="margin:0 15px; color:white;">
+            <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://www.linkedin.com/company/sparda-bank-baden-w%C3%BCrttemberg/?originalSubdomain=de" 
+           target="blank" 
+           style="margin:0 15px; color:white;">
+            <i class="fab fa-linkedin"></i>
+        </a>
+        <a href="https://www.sparda-bw.de/?gad_source=1&gad_campaignid=6464835005&gbraid=0AAAAADmBbPMOUBEonlvbJ0cHll8zwKKWq&gclid=CjwKCAiA8vXIBhAtEiwAf3B-g5VRORivE5zEXNoSXQ13sY_1P0FDw8bV0kItMY3e2VLWOiK03XC1phoCBCEQAvD_BwE" 
+           target="blank" 
+           style="margin:0 15px; color:white;">
+            <i class="fas fa-globe"></i>
+        </a>
+    </div>
+
+    <p style="margin-top:10px; font-size:14px; color:white;">
+        © 2025 Sparda Bank- Baden Württemberg
+    </p>
+</footer>
+</body>
+</html>

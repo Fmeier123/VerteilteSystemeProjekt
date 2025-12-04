@@ -1,0 +1,185 @@
+let db;
+let alleUmsaetze = [];
+let temporaereLabels = {}; // Speichert temporäre Labels pro UmsatzID
+
+// 1. Datenbank laden
+async function ladeDatenbank() {
+  try {
+    const SQL = await initSqlJs({
+      locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}`
+    });
+
+    const file = await fetch("db/Bank.db");
+    const buf = await file.arrayBuffer();
+    db = new SQL.Database(new Uint8Array(buf));
+
+    ladeUmsaetze();
+    ladeIBAN();
+  } catch (error) {
+    console.error("Fehler beim Laden der Datenbank:", error);
+    document.getElementById("saldoAnzeige").textContent = "Fehler beim Laden";
+  }
+}
+function ladeIBAN() {
+    const stmt = db.prepare("SELECT IBAN FROM Account WHERE AccountId = 1");
+
+    if (stmt.step()) {
+        const row = stmt.getAsObject();
+        document.getElementById("ibanAnzeige").textContent = row.IBAN;
+    }
+    stmt.free();
+}
+
+
+document.getElementById("aktualisierenBtn").onclick = ladeUmsaetze;
+
+// 2. Labels zu einem Umsatz abrufen (inklusive temporäre Labels)
+function ladeLabels(umsatzID) {
+    let dbLabels = [];
+    
+    try {
+        const stmt = db.prepare(`
+            SELECT Labels.Name
+            FROM Labels
+            JOIN UmsatzLabels ON Labels.LabelID = UmsatzLabels.LabelID
+            WHERE UmsatzLabels.UmsatzID = ?
+        `);
+
+        stmt.bind([umsatzID]);
+
+        while (stmt.step()) {
+            dbLabels.push(stmt.getAsObject().Name);
+        }
+        stmt.free();
+    } catch (error) {
+        console.error("Fehler beim Laden der Labels:", error);
+    }
+
+    // Temporäre Labels hinzufügen
+    const tempLabels = temporaereLabels[umsatzID] || [];
+    const alleLabels = [...dbLabels, ...tempLabels];
+    
+    return alleLabels.join(", ");
+}
+
+// 3. Umsätze laden
+function ladeUmsaetze() {
+  if (!db) {
+    console.error("Datenbank nicht geladen");
+    return;
+  }
+
+  alleUmsaetze = []; // Reset für Suche
+  let saldo = 0;
+
+  try {
+  const stmt = db.prepare(`
+      SELECT UmsatzID, Datum, Beschreibung, Betrag
+      FROM Umsatz
+      WHERE AccountID = 1
+      ORDER BY Datum DESC
+`);
+
+
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      const labels = ladeLabels(row.UmsatzID);
+
+      alleUmsaetze.push({
+        id: row.UmsatzID,
+        datum: row.Datum,
+        beschreibung: row.Beschreibung,
+        betrag: parseFloat(row.Betrag),
+        labels: labels
+      });
+
+      saldo += parseFloat(row.Betrag);
+    }
+    stmt.free();
+
+    // Nur einmal rendern, nachdem alle Daten geladen wurden
+    renderUmsaetze(alleUmsaetze);
+
+    document.getElementById("saldoAnzeige").textContent = saldo.toFixed(2) + " €";
+    
+  } catch (error) {
+    console.error("Fehler beim Laden der Umsätze:", error);
+  }
+}
+
+// 4. Detailseite
+function zeigeDetails(umsatzID) {
+  const url = new URL("details.html", window.location.href);
+  url.searchParams.set("umsatzID", umsatzID);
+  
+  // Temporäre Labels als URL-Parameter übergeben
+  const tempLabels = temporaereLabels[umsatzID] || [];
+  if (tempLabels.length > 0) {
+    url.searchParams.set("tempLabels", tempLabels.join(","));
+  }
+  
+  window.location.href = url.toString();
+}
+
+// 5. Render-Funktion
+function renderUmsaetze(liste) {
+  const tabelle = document.getElementById("umsatzTabelle");
+  tabelle.innerHTML = "";
+
+  liste.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.datum}</td>
+      <td>${row.beschreibung}</td>
+      <td class="${row.betrag < 0 ? 'negativ' : 'positiv'}">${row.betrag.toFixed(2)}</td>
+      <td>${row.labels}</td>
+      <td>
+        <button onclick="zeigeDetails(${row.id})">Details</button>
+      </td>
+    `;
+    tabelle.appendChild(tr);
+  });
+}
+
+// 6. Funktion zum Hinzufügen temporärer Labels (wird von Detailseite aufgerufen)
+function addTemporaereLabels(umsatzID, neueLabels) {
+  if (!temporaereLabels[umsatzID]) {
+    temporaereLabels[umsatzID] = [];
+  }
+  
+  neueLabels.forEach(label => {
+    if (!temporaereLabels[umsatzID].includes(label)) {
+      temporaereLabels[umsatzID].push(label);
+    }
+  });
+  
+ladeIBAN();
+ladeUmsaetze();
+
+}
+
+// Starten
+ladeDatenbank();
+
+// Live-Suche aktivieren
+document.getElementById("searchInput").addEventListener("input", function() {
+    const query = this.value.toLowerCase();
+
+    const gefiltert = alleUmsaetze.filter(row => 
+      row.datum.toLowerCase().includes(query) ||
+      row.beschreibung.toLowerCase().includes(query) ||
+      row.betrag.toString().includes(query) ||
+      row.sender.toLowerCase().includes(query) ||
+      row.labels.toLowerCase().includes(query)
+    );
+
+    renderUmsaetze(gefiltert);
+});
+
+// Event Listener für Nachrichten von der Detailseite
+window.addEventListener('storage', function(e) {
+  if (e.key === 'labelUpdate') {
+    const data = JSON.parse(e.newValue);
+    addTemporaereLabels(data.umsatzID, data.labels);
+  }
+});

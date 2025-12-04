@@ -1,0 +1,485 @@
+/* ===== Grundlayout ===== */
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f6fa;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* ===== Header ===== */
+header {
+  background: #00539C;
+  color: white;
+  padding: 1.5em;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8em;
+  text-align: center;
+  flex: 1;
+}
+
+/* Header Slots */
+header .styled-wrapper,
+header .toggle-switch {
+  flex: 0 0 auto;
+}
+
+/* ===== Hauptcontainer ===== */
+main {
+  max-width: 1000px;
+  margin: 30px auto;
+  background: white;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* ===== Überschriften ===== */
+h2 {
+  color: #00539C;
+  border-bottom: 2px solid #00539C;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+}
+
+/* ===== Konto-Info (Übersicht) ===== */
+.konto-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #eaf2f9;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.konto-info h2 {
+  margin: 0;
+  color: #00539C;
+}
+
+.saldo {
+  font-size: 1.4em;
+  font-weight: bold;
+  color: #00539C;
+}
+
+/* ===== Suchfeld ===== */
+#searchInput {
+  width: 100%;
+  padding: 12px;
+  margin: 15px 0;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border 0.3s ease;
+}
+
+#searchInput:focus {
+  border-color: #00539C;
+  outline: none;
+}
+
+/* ===== Tabelle ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+thead {
+  background: #00539C;
+  color: white;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover {
+  background: #f1f7ff;
+}
+
+/* Betragsfarben */
+.positiv { color: green; font-weight: bold; }
+.negativ { color: red; font-weight: bold; }
+
+/* ===== Zurück-Button oben links ===== */
+.styled-wrapper {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 9999;
+}
+
+.styled-wrapper .button {
+  display: block;
+  position: relative;
+  width: 50px;
+  height: 50px;
+  margin: 0;
+  overflow: hidden;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+  border: 0;
+}
+
+.styled-wrapper .button:before {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  inset: 7px;
+  border: 2px solid hsl(232, 100%, 19%);
+  transition: opacity 0.4s, transform 0.5s;
+}
+
+.styled-wrapper .button:after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  inset: 7px;
+  border: 3px solid hsl(232, 100%, 19%);
+  transform: scale(1.3);
+  opacity: 0;
+  transition: opacity 0.4s, transform 0.5s;
+}
+
+.styled-wrapper .button:hover:before,
+.styled-wrapper .button:focus:before { opacity: 0; transform: scale(0.7); }
+.styled-wrapper .button:hover:after,
+.styled-wrapper .button:focus:after { opacity: 1; transform: scale(1); }
+
+.styled-wrapper .button-box {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.styled-wrapper .button-elem {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 15px 12px 0 15px;
+  fill: hsl(232, 100%, 19%);
+  transition: 0.4s;
+}
+
+.styled-wrapper .button:hover .button-box,
+.styled-wrapper .button:focus .button-box { transform: translateX(-40px); }
+
+/* ===== Detail-Ansicht ===== */
+.detail-item {
+  margin: 15px 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.label {
+  width: 180px;
+  color: #00539C;
+  font-weight: bold;
+}
+
+.value { flex: 1; }
+.betrag { font-weight: bold; }
+
+/* ===== Labels ===== */
+.label-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+.label-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #00539C;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.tag {
+  background: #00539C;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+}
+
+.tag.temp { background: #ff6b35; }
+
+/* Mülleimer-Button neben Labels */
+.delete-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #ff4d4f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.delete-btn:hover {
+  background: #ff7875;
+  transform: translateY(-3px);
+  box-shadow: 0px 4px 10px rgba(255, 77, 79, 0.4);
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
+
+.delete-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+  pointer-events: none;
+}
+
+/* ===== Eingabezeilen ===== */
+.label-input-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+input[type=text] {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* ===== Buttons ===== */
+button {
+  background: #00539C;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.3s ease;
+}
+
+button:hover { background: #003f73; }
+.back-btn { margin-top: 25px; width: 100%; }
+
+/* ===== Footer ===== */
+footer {
+  background: #00539C;
+  padding: 20px;
+  text-align: center;
+  margin-top: 40px;
+}
+
+footer a {
+  margin: 0 15px;
+  color: white;
+  font-size: 24px;
+  transition: color 0.3s ease;
+}
+
+footer a:hover { color: #ffcc00; }
+
+footer p {
+  margin-top: 10px;
+  font-size: 14px;
+  color: white;
+}
+
+/* ===== Konto-Auswahl Karten ===== */
+.konto-auswahl {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.konto-card {
+  background: #eaf2f9;
+  border-radius: 12px;
+  padding: 20px;
+  width: 250px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.konto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.konto-card h3 {
+  margin-top: 0;
+  color: #00539C;
+}
+
+/* ===== Toggle Switch (klein) ===== */
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 25px;
+  --light: #d8dbe0;
+  --dark: #28292c;
+  --link: rgb(27,129,112);
+  --link-hover: rgb(24,94,82);
+}
+
+.switch-label {
+  position: absolute;
+  width: 100%;
+  height: 25px;
+  background-color: var(--dark);
+  border-radius: 12.5px;
+  cursor: pointer;
+  border: 2px solid var(--dark);
+}
+
+.checkbox { position: absolute; display: none; }
+
+.slider {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 12.5px;
+  transition: 0.3s;
+}
+
+.checkbox:checked ~ .slider { background-color: var(--light); }
+
+.slider::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  box-shadow: inset 8px -3px 0px 0px var(--light);
+  background-color: var(--dark);
+  transition: 0.3s;
+}
+
+.checkbox:checked ~ .slider::before {
+  transform: translateX(25px);
+  background-color: var(--dark);
+  box-shadow: none;
+}
+
+/* ===== Dark Mode ===== */
+body.dark-mode {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode header { background: #1f1f1f; color: #e0e0e0; }
+body.dark-mode main { background: #1e1e1e; box-shadow: none; }
+
+body.dark-mode h2 {
+  color: #90caf9;
+  border-bottom: 2px solid #90caf9;
+}
+
+body.dark-mode .konto-info { background: #2a2a2a; }
+body.dark-mode .saldo { color: #90caf9; }
+
+body.dark-mode table { background: #1e1e1e; color: #e0e0e0; }
+body.dark-mode thead { background: #2a2a2a; color: #90caf9; }
+body.dark-mode tbody tr:hover { background: #333333; }
+
+body.dark-mode input[type=text] {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border: 1px solid #555;
+}
+
+body.dark-mode button { background: #333333; color: #e0e0e0; }
+body.dark-mode button:hover { background: #555555; }
+
+body.dark-mode footer { background: #1f1f1f; }
+body.dark-mode footer a { color: #e0e0e0; }
+body.dark-mode footer a:hover { color: #90caf9; }
+
+body.dark-mode .delete-btn { color: #e0e0e0; }
+body.dark-mode .delete-btn:hover { color: #ff6b35; }
+
+body.dark-mode .switch-label {
+  background-color: var(--light);
+  border-color: var(--light);
+}
+body.dark-mode .slider::before { background-color: var(--dark); }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .konto-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  th, td { font-size: 0.9em; }
+  .label { width: 100%; margin-bottom: 5px; }
+}
+
+/* ===== Drucklayout ===== */
+@media print {
+  header, footer, button, #searchInput, .label-input-row { display: none; }
+
+  main { box-shadow: none; border-radius: 0; margin: 0; padding: 0; }
+
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: none; padding: 8px 12px; }
+
+  /* Spalte "Aktion" ausblenden */
+  th:last-child, td:last-child { display: none; }
+
+  /* Farben für Beträge beibehalten */
+  .positiv { color: green; font-weight: bold; }
+  .negativ { color: red; font-weight: bold; }
+
+  /* neutrale Kopfzeile im Druck */
+  thead { background: none; color: black; font-weight: bold; }
+}
+/* Darkmode für Konto-Auswahl-Karten */
+body.dark-mode .konto-card {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  box-shadow: none;
+  border: 1px solid #3a3a3a; /* optional für klare Kontur */
+}
+
+body.dark-mode .konto-card h3 {
+  color: #90caf9; /* passend zu deinen Darkmode-Akzenten */
+}
+
+body.dark-mode .konto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4); /* dunkler Hover-Schatten */
+}
+
+/* Optional: Darker background hinter den Karten */
+body.dark-mode .konto-auswahl {
+  background: transparent; /* oder #1e1e1e, wenn der Bereich selbst einen Hintergrund hat */
+}

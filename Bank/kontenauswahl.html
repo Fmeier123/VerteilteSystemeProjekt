@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontenauswahl – Meine Bank</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Font Awesome für die Social Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="styled-wrapper">
+      <button class="button" onclick="window.history.back()">
+        <span class="button-box">
+          <svg class="button-elem" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </span>
+      </button>
+    </div>
+
+    <h1>Meine Bank – Kontenauswahl</h1>
+
+    <div class="toggle-switch">
+      <label class="switch-label">
+        <input type="checkbox" class="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <h2>Bitte wählen Sie ein Konto</h2>
+
+    <div class="konto-auswahl">
+      <div class="konto-card" onclick="window.location.href='Bankübersiht.html?account=1'">
+        <h3>Girokonto</h3>
+        <p>Ihr klassisches Konto für den täglichen Zahlungsverkehr.</p>
+      </div>
+
+      <div class="konto-card" onclick="window.location.href='Bankübersiht.html?account=2'">
+        <h3>Sparkonto</h3>
+        <p>Das sichere Konto für Ihre Rücklagen und Ersparnisse.</p>
+      </div>
+
+      <div class="konto-card" onclick="window.location.href='Bankübersiht.html?account=3'">
+        <h3>Kreditkarte</h3>
+        <p>Alle Umsätze Ihrer Kreditkarte im Überblick.</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/kontenauswahl.js" defer></script>
+
+  <footer style="background:#00539C; padding:20px; text-align:center;">
+    <div style="font-size:24px;">
+      <a href="https://www.instagram.com/spardabw/?hl=de" target="blank" rel="noopener noreferrer" style="margin:0 15px; color:white;">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://www.linkedin.com/company/sparda-bank-baden-w%C3%BCrttemberg/" target="blank" rel="noopener noreferrer" style="margin:0 15px; color:white;">
+        <i class="fab fa-linkedin"></i>
+      </a>
+      <a href="https://www.sparda-bw.de/" target="blank" rel="noopener noreferrer" style="margin:0 15px; color:white;">
+        <i class="fas fa-globe"></i>
+      </a>
+    </div>
+    <p style="margin-top:10px; font-size:14px; color:white;">
+      © 2025 Sparda Bank Baden Württemberg
+    </p>
+  </footer>
+</body>
+</html>
